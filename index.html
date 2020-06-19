@@ -126,9 +126,18 @@
                     event.preventDefault();
                 }
 
-                if (textArea.value !== ps1 && event.key === 'Enter') {
+                if (event.key === 'Enter') {
                     event.preventDefault();
-                    executeCommand(textArea.value);
+
+                    if (textArea.value !== ps1) {
+                        executeCommand(textArea.value);
+                    } else {
+                        const emptyNode = document.createElement('p');
+
+                        emptyNode.innerHTML = ps1;
+
+                        historyNode.appendChild(emptyNode);
+                    }
                 }
             };
         })()
