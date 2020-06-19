@@ -36,33 +36,85 @@
             }
         }
 
-        .terminal textarea {
-            border: none;
-            background-color: #000;
+        .history p {
+            margin: 0;
+        }
+
+        .terminal textarea, .history {
             color: #fff;
             font-size: 18px;
-            width: 100%;
+        }
+
+        .terminal textarea {
+            background-color: #000;
+            border: none;
+            font-family: 'Ubuntu Mono', monospace;
             outline: none;
+            padding: 0;
             resize: none;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="terminal">
+            <div class="history"></div>
             <textarea autofocus spellcheck="false" type="text"></textarea>
         </div>
     </div>
     <script type="text/javascript">
         (function() {
+            const historyNode = document.getElementsByClassName('history')[0];
             const ps1 = "nico@home:~$ ";
             const textArea = document.querySelector('textarea');
 
+            const commands = {
+                clear: clearConsole
+            };
+
             textArea.value = ps1;
             textArea.focus();
+            textArea.onblur = onBlur;
+            textArea.onkeydown = onKeyDown;
+
+            function clearConsole () {
+                while (historyNode.firstChild) {
+                    historyNode.removeChild(historyNode.firstChild);
+                }
+            }
+
+            function handleCommandNotFound (command) {
+                const commandNotFoundNode = document.createElement('p');
+
+                commandNotFoundNode.innerHTML = `command not found: ${command}`;
+
+                historyNode.appendChild(commandNotFoundNode);
+            }
+
+            function resetInput () {
+                textArea.value = ps1;
+                textArea.focus();
+            }
 
             function onBlur (event) {
                 textArea.focus();
+            }
+
+            function executeCommand (command) {
+                const commandText = command.substr(ps1.length, command.length);
+                const executedCommandNode = document.createElement('p');
+
+                executedCommandNode.innerHTML = command;
+                historyNode.appendChild(executedCommandNode);
+
+                try {
+                    commands[commandText]();
+                } catch (error) {
+                    handleCommandNotFound(commandText);
+                }
+
+                resetInput();
             }
 
             function onKeyDown (event) {
@@ -73,10 +125,12 @@
                 if (~event.key.indexOf('Arrow')) {
                     event.preventDefault();
                 }
-            };
 
-            textArea.onblur = onBlur;
-            textArea.onkeydown = onKeyDown;
+                if (textArea.value !== ps1 && event.key === 'Enter') {
+                    event.preventDefault();
+                    executeCommand(textArea.value);
+                }
+            };
         })()
     </script>
 </body>
