@@ -1,1 +1,83 @@
-Soon
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nico@home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <style>
+        html {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Ubuntu Mono', monospace;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        body {
+            height: 100%;
+        }
+
+        .container {
+            height: 100%;
+            width: 100%;
+        }
+
+        @media (min-width: 700px) {
+            .container {
+                align-items: center;
+                display: flex;
+                justify-content: center;
+            }
+
+            .terminal {
+                max-width: 700px;
+                width: 700px;
+            }
+        }
+
+        .terminal textarea {
+            border: none;
+            background-color: #000;
+            color: #fff;
+            font-size: 18px;
+            width: 100%;
+            outline: none;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="terminal">
+            <textarea autofocus spellcheck="false" type="text"></textarea>
+        </div>
+    </div>
+    <script type="text/javascript">
+        (function() {
+            const ps1 = "nico@home:~$ ";
+            const textArea = document.querySelector('textarea');
+
+            textArea.value = ps1;
+            textArea.focus();
+
+            function onBlur (event) {
+                textArea.focus();
+            }
+
+            function onKeyDown (event) {
+                if (textArea.value === ps1 && event.key === 'Backspace') {
+                    event.preventDefault();
+                }
+
+                if (~event.key.indexOf('Arrow')) {
+                    event.preventDefault();
+                }
+            };
+
+            textArea.onblur = onBlur;
+            textArea.onkeydown = onKeyDown;
+        })()
+    </script>
+</body>
+</html>
