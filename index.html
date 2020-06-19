@@ -38,6 +38,7 @@
 
         .history p {
             margin: 0;
+            white-space: pre-line;
         }
 
         .terminal textarea, .history {
@@ -70,7 +71,10 @@
             const textArea = document.querySelector('textarea');
 
             const commands = {
-                clear: clearConsole
+                clear: clearConsole,
+                ls: listDirectory,
+                'ls -a': listDirectoryWithHidden,
+                'cat contact.txt': showContactInformation
             };
 
             textArea.value = ps1;
@@ -82,6 +86,31 @@
                 while (historyNode.firstChild) {
                     historyNode.removeChild(historyNode.firstChild);
                 }
+            }
+
+            function listDirectory () {
+                const contactNode = document.createElement('p');
+
+                contactNode.innerHTML = 'contact.txt';
+                historyNode.appendChild(contactNode);
+            }
+
+            function listDirectoryWithHidden () {
+                const listNode = document.createElement('p');
+
+                listNode.innerHTML = '.&nbsp;&nbsp;&nbsp;..&nbsp;&nbsp;&nbsp;contact.txt';
+
+                historyNode.appendChild(listNode);
+            }
+
+            function showContactInformation () {
+                const contactNode = document.createElement('p');
+
+                contactNode.innerHTML = `email: nicolaseacquaviva@gmail.com
+                github: github.com/nicolasacquaviva
+                linkedin: linkedin.com/in/nicolasacquaviva`;
+
+                historyNode.appendChild(contactNode);
             }
 
             function handleCommandNotFound (command) {
