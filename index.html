@@ -79,6 +79,7 @@
         const historyNode = document.getElementsByClassName('history')[0];
         const ps1 = "nico@home:~$ ";
         const textArea = document.querySelector('textarea');
+        const spaceCharacter = '&nbsp;&nbsp;&nbsp;';
 
         const commands = {
             clear: {
@@ -97,6 +98,17 @@
                 execute: showHelp,
                 description: 'Show help about how to use the site'
             }
+        };
+
+        const files = {
+            'contact.txt': `- email: <a href="mailto:nicolaseacquaviva@gmail.com" target="_blank" class="link">nicolaseacquaviva@gmail.com</a>
+            - github: <a href="https://github.com/nicolasacquaviva" target="_blank" class="link">github.com/nicolasacquaviva</a>
+            - linkedin: <a href="https://linkedin.com/in/nicolasacquaviva" target="_blank" class="link">linkedin.com/in/nicolasacquaviva</a>`,
+            'about.txt': `Hey! This is Nico, I'm a software engineer from Argentina.
+            I've been working with web technologies for around 5 years.
+            I'm very passionate about minimalist software and terminal based applications.
+
+            If you want to get in touch check the "contact.txt" file. Glad you have you here!`
         };
 
         textArea.value = ps1;
@@ -125,24 +137,30 @@
             if (!params || params.length !== 1) {
                 utils.print('usage: cat [file_name]');
             } else {
-                if (params[0] === 'contact.txt') {
-                    showContactInformation();
+                const fileContent = files[params[0]];
+
+                if (fileContent) {
+                    utils.print(fileContent);
                 } else {
                     utils.print(`cat: ${params[0]}: No such file or directory`)
                 }
             }
         }
 
+        function getDirContent () {
+            return Object.keys(files).join(spaceCharacter);
+        }
+
         function listDirectory (params) {
             if (params && params[0] === '-a') {
                 listDirectoryWithHidden();
             } else {
-                utils.print('contact.txt');
+                utils.print(getDirContent());
             }
         }
 
         function listDirectoryWithHidden () {
-            utils.print('.&nbsp;&nbsp;&nbsp;..&nbsp;&nbsp;&nbsp;contact.txt');
+            utils.print(`.${spaceCharacter}..${spaceCharacter}${getDirContent()}`);
         }
 
         function showContactInformation () {
