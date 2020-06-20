@@ -15,7 +15,6 @@
     <style>
         html {
             background-color: #000;
-            color: #fff;
             font-family: 'Ubuntu Mono', monospace;
             height: 100%;
             pointer-events: none;
@@ -49,7 +48,7 @@
         }
 
         .terminal textarea, .history {
-            color: #fff;
+            color: #ffc;
             font-size: 18px;
         }
 
@@ -78,10 +77,26 @@
             const textArea = document.querySelector('textarea');
 
             const commands = {
-                clear: clearConsole,
-                ls: listDirectory,
-                'ls -a': listDirectoryWithHidden,
-                'cat contact.txt': showContactInformation
+                clear: {
+                    execute: clearConsole,
+                    description: 'Clear the console'
+                },
+                ls: {
+                    execute: listDirectory,
+                    description: 'List directory contents'
+                },
+                'ls -a': {
+                    execute: listDirectoryWithHidden,
+                    description: ''
+                },
+                'cat contact.txt': {
+                    execute: showContactInformation,
+                    description: 'Print file content'
+                },
+                help: {
+                    execute: showHelp,
+                    description: 'Show help about how to use the site'
+                }
             };
 
             textArea.value = ps1;
@@ -89,43 +104,47 @@
             textArea.onblur = onBlur;
             textArea.onkeydown = onKeyDown;
 
-            function clearConsole () {
-                while (historyNode.firstChild) {
-                    historyNode.removeChild(historyNode.firstChild);
+            const utils = {
+                print: (content) => {
+                    const newHistoryNode = document.createElement('p');
+                    newHistoryNode.innerHTML = content;
+                    historyNode.appendChild(newHistoryNode);
+                },
+                clear: () => {
+                    while (historyNode.firstChild) {
+                        historyNode.removeChild(historyNode.firstChild);
+                    }
                 }
             }
 
-            function listDirectory () {
-                const contactNode = document.createElement('p');
+            function clearConsole () {
+                utils.clear()
+            }
 
-                contactNode.innerHTML = 'contact.txt';
-                historyNode.appendChild(contactNode);
+            function listDirectory () {
+                utils.print('contact.txt')
             }
 
             function listDirectoryWithHidden () {
-                const listNode = document.createElement('p');
-
-                listNode.innerHTML = '.&nbsp;&nbsp;&nbsp;..&nbsp;&nbsp;&nbsp;contact.txt';
-
-                historyNode.appendChild(listNode);
+                utils.print('.&nbsp;&nbsp;&nbsp;..&nbsp;&nbsp;&nbsp;contact.txt');
             }
 
             function showContactInformation () {
-                const contactNode = document.createElement('p');
+                utils.print(`- email: nicolaseacquaviva@gmail.com
+                - github: github.com/nicolasacquaviva
+                - linkedin: linkedin.com/in/nicolasacquaviva`);
+            }
 
-                contactNode.innerHTML = `email: nicolaseacquaviva@gmail.com
-                github: github.com/nicolasacquaviva
-                linkedin: linkedin.com/in/nicolasacquaviva`;
+            function showHelp () {
+                utils.print('available commands: ');
 
-                historyNode.appendChild(contactNode);
+                for (command in commands) {
+                    utils.print(` - ${command}: ${commands[command].description}`);
+                }
             }
 
             function handleCommandNotFound (command) {
-                const commandNotFoundNode = document.createElement('p');
-
-                commandNotFoundNode.innerHTML = `command not found: ${command}`;
-
-                historyNode.appendChild(commandNotFoundNode);
+                utils.print(`command not found: ${command}`);
             }
 
             function resetInput () {
@@ -139,13 +158,11 @@
 
             function executeCommand (command) {
                 const commandText = command.substr(ps1.length, command.length);
-                const executedCommandNode = document.createElement('p');
 
-                executedCommandNode.innerHTML = command;
-                historyNode.appendChild(executedCommandNode);
+                utils.print(command);
 
                 try {
-                    commands[commandText]();
+                    commands[commandText].execute();
                 } catch (error) {
                     handleCommandNotFound(commandText);
                 }
@@ -168,11 +185,7 @@
                     if (textArea.value !== ps1) {
                         executeCommand(textArea.value);
                     } else {
-                        const emptyNode = document.createElement('p');
-
-                        emptyNode.innerHTML = ps1;
-
-                        historyNode.appendChild(emptyNode);
+                        utils.print(ps1);
                     }
                 }
             };
