@@ -71,125 +71,123 @@
         </div>
     </div>
     <script type="text/javascript">
-        (function() {
-            const historyNode = document.getElementsByClassName('history')[0];
-            const ps1 = "nico@home:~$ ";
-            const textArea = document.querySelector('textarea');
+        const historyNode = document.getElementsByClassName('history')[0];
+        const ps1 = "nico@home:~$ ";
+        const textArea = document.querySelector('textarea');
 
-            const commands = {
-                clear: {
-                    execute: clearConsole,
-                    description: 'Clear the console'
-                },
-                ls: {
-                    execute: listDirectory,
-                    description: 'List directory contents'
-                },
-                'ls -a': {
-                    execute: listDirectoryWithHidden,
-                    description: ''
-                },
-                'cat contact.txt': {
-                    execute: showContactInformation,
-                    description: 'Print file content'
-                },
-                help: {
-                    execute: showHelp,
-                    description: 'Show help about how to use the site'
+        const commands = {
+            clear: {
+                execute: clearConsole,
+                description: 'Clear the console'
+            },
+            ls: {
+                execute: listDirectory,
+                description: 'List directory contents'
+            },
+            'ls -a': {
+                execute: listDirectoryWithHidden,
+                description: ''
+            },
+            'cat contact.txt': {
+                execute: showContactInformation,
+                description: 'Print file content'
+            },
+            help: {
+                execute: showHelp,
+                description: 'Show help about how to use the site'
+            }
+        };
+
+        textArea.value = ps1;
+        textArea.focus();
+        textArea.onblur = onBlur;
+        textArea.onkeydown = onKeyDown;
+
+        const utils = {
+            print: (content) => {
+                const newHistoryNode = document.createElement('p');
+                newHistoryNode.innerHTML = content;
+                historyNode.appendChild(newHistoryNode);
+            },
+            clear: () => {
+                while (historyNode.firstChild) {
+                    historyNode.removeChild(historyNode.firstChild);
                 }
-            };
+            }
+        }
 
+        function clearConsole () {
+            utils.clear()
+        }
+
+        function listDirectory () {
+            utils.print('contact.txt')
+        }
+
+        function listDirectoryWithHidden () {
+            utils.print('.&nbsp;&nbsp;&nbsp;..&nbsp;&nbsp;&nbsp;contact.txt');
+        }
+
+        function showContactInformation () {
+            utils.print(`- email: nicolaseacquaviva@gmail.com
+            - github: github.com/nicolasacquaviva
+            - linkedin: linkedin.com/in/nicolasacquaviva`);
+        }
+
+        function showHelp () {
+            utils.print('available commands: ');
+
+            for (command in commands) {
+                utils.print(` - ${command}: ${commands[command].description}`);
+            }
+        }
+
+        function handleCommandNotFound (command) {
+            utils.print(`command not found: ${command}`);
+        }
+
+        function resetInput () {
             textArea.value = ps1;
             textArea.focus();
-            textArea.onblur = onBlur;
-            textArea.onkeydown = onKeyDown;
+        }
 
-            const utils = {
-                print: (content) => {
-                    const newHistoryNode = document.createElement('p');
-                    newHistoryNode.innerHTML = content;
-                    historyNode.appendChild(newHistoryNode);
-                },
-                clear: () => {
-                    while (historyNode.firstChild) {
-                        historyNode.removeChild(historyNode.firstChild);
-                    }
+        function onBlur (event) {
+            textArea.focus();
+        }
+
+        function executeCommand (command) {
+            const commandText = command.substr(ps1.length, command.length);
+
+            utils.print(command);
+
+            try {
+                commands[commandText].execute();
+            } catch (error) {
+                handleCommandNotFound(commandText);
+            }
+
+            resetInput();
+        }
+
+        function onKeyDown (event) {
+            if (textArea.value === ps1 && event.key === 'Backspace') {
+                event.preventDefault();
+            }
+
+            if (~event.key.indexOf('Arrow')) {
+                event.preventDefault();
+            }
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+
+                if (textArea.value !== ps1) {
+                    executeCommand(textArea.value);
+                } else {
+                    utils.print(ps1);
                 }
             }
-
-            function clearConsole () {
-                utils.clear()
-            }
-
-            function listDirectory () {
-                utils.print('contact.txt')
-            }
-
-            function listDirectoryWithHidden () {
-                utils.print('.&nbsp;&nbsp;&nbsp;..&nbsp;&nbsp;&nbsp;contact.txt');
-            }
-
-            function showContactInformation () {
-                utils.print(`- email: nicolaseacquaviva@gmail.com
-                - github: github.com/nicolasacquaviva
-                - linkedin: linkedin.com/in/nicolasacquaviva`);
-            }
-
-            function showHelp () {
-                utils.print('available commands: ');
-
-                for (command in commands) {
-                    utils.print(` - ${command}: ${commands[command].description}`);
-                }
-            }
-
-            function handleCommandNotFound (command) {
-                utils.print(`command not found: ${command}`);
-            }
-
-            function resetInput () {
-                textArea.value = ps1;
-                textArea.focus();
-            }
-
-            function onBlur (event) {
-                textArea.focus();
-            }
-
-            function executeCommand (command) {
-                const commandText = command.substr(ps1.length, command.length);
-
-                utils.print(command);
-
-                try {
-                    commands[commandText].execute();
-                } catch (error) {
-                    handleCommandNotFound(commandText);
-                }
-
-                resetInput();
-            }
-
-            function onKeyDown (event) {
-                if (textArea.value === ps1 && event.key === 'Backspace') {
-                    event.preventDefault();
-                }
-
-                if (~event.key.indexOf('Arrow')) {
-                    event.preventDefault();
-                }
-
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-
-                    if (textArea.value !== ps1) {
-                        executeCommand(textArea.value);
-                    } else {
-                        utils.print(ps1);
-                    }
-                }
-            };
-        })()
+        };
     </script>
 </body>
 </html>
