@@ -180,25 +180,26 @@
             utils.print(input);
 
             try {
-                ga('send', {
-                    hitType: 'success',
-                    eventCategory: 'Command',
-                    eventAction: 'execute',
-                    data: {
-                        command
-                    }
-                });
-
                 commands[command].execute(params);
+
+                ga(
+                    'send',
+                    'event',
+                    'command',
+                    command,
+                    'Command executed successfully',
+                    1
+                );
+
             } catch (error) {
-                ga('send', {
-                    hitType: 'error',
-                    eventCategory: 'Command',
-                    eventAction: 'execute',
-                    data: {
-                        command
-                    }
-                });
+                ga(
+                    'send',
+                    'event',
+                    'command_error',
+                    command,
+                    'Command unexistent or failed to execute',
+                    1
+                );
 
                 handleCommandNotFound(commandText);
             }
