@@ -47,6 +47,11 @@
             white-space: pre-line;
         }
 
+        .history .link {
+            color: #ffc;
+            pointer-events: all;
+        }
+
         .terminal textarea, .history {
             color: #ffc;
             font-size: 18px;
@@ -84,12 +89,8 @@
                 execute: listDirectory,
                 description: 'List directory contents'
             },
-            'ls -a': {
-                execute: listDirectoryWithHidden,
-                description: ''
-            },
-            'cat contact.txt': {
-                execute: showContactInformation,
+            'cat': {
+                execute: executeCat,
                 description: 'Print file content'
             },
             help: {
@@ -114,14 +115,30 @@
                     historyNode.removeChild(historyNode.firstChild);
                 }
             }
-        }
+        };
 
         function clearConsole () {
-            utils.clear()
+            utils.clear();
         }
 
-        function listDirectory () {
-            utils.print('contact.txt')
+        function executeCat (params) {
+            if (!params || params.length !== 1) {
+                utils.print('usage: cat [file_name]');
+            } else {
+                if (params[0] === 'contact.txt') {
+                    showContactInformation();
+                } else {
+                    utils.print(`cat: ${params[0]}: No such file or directory`)
+                }
+            }
+        }
+
+        function listDirectory (params) {
+            if (params && params[0] === '-a') {
+                listDirectoryWithHidden();
+            } else {
+                utils.print('contact.txt');
+            }
         }
 
         function listDirectoryWithHidden () {
@@ -129,9 +146,9 @@
         }
 
         function showContactInformation () {
-            utils.print(`- email: nicolaseacquaviva@gmail.com
-            - github: github.com/nicolasacquaviva
-            - linkedin: linkedin.com/in/nicolasacquaviva`);
+            utils.print(`- email: <a href="mailto:nicolaseacquaviva@gmail.com" target="_blank" class="link">nicolaseacquaviva@gmail.com</a>
+            - github: <a href="https://github.com/nicolasacquaviva" target="_blank" class="link">github.com/nicolasacquaviva</a>
+            - linkedin: <a href="https://linkedin.com/in/nicolasacquaviva" target="_blank" class="link">linkedin.com/in/nicolasacquaviva</a>`);
         }
 
         function showHelp () {
@@ -155,13 +172,15 @@
             textArea.focus();
         }
 
-        function executeCommand (command) {
-            const commandText = command.substr(ps1.length, command.length);
+        function executeCommand (input) {
+            const commandText = input.substr(ps1.length, input.length);
+            const params = commandText.split(' ');
+            const command = params.shift();
 
-            utils.print(command);
+            utils.print(input);
 
             try {
-                commands[commandText].execute();
+                commands[command].execute(params);
             } catch (error) {
                 handleCommandNotFound(commandText);
             }
