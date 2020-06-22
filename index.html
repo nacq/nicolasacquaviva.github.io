@@ -214,7 +214,7 @@
                 );
 
             } catch (error) {
-                conn.send(`command_error:${error}`);
+                conn.send(`command_error:${command}`);
 
                 ga(
                     'send',
