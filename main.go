@@ -107,5 +107,5 @@ func main() {
 
     env.attachHttpHandlers()
 
-    log.Fatal(http.ListenAndServe(":3030", nil))
+    log.Fatal(http.ListenAndServe(os.Getenv("PORT"), nil))
 }
