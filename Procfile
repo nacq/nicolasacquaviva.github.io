@@ -1,1 +1,1 @@
-web: bin/main
+web: bin/nicolasacquaviva.github.io
