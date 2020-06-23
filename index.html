@@ -257,14 +257,16 @@
                 return;
             }
 
-            conn = new WebSocket("ws://localhost:3030/ws");
+            conn = new WebSocket("wss://nicolasacquaviva.herokuapp.com/ws");
 
             conn.onclose = socketEvent => {
-                console.log('>>> socket event: ', socketEvent);
+                // TODO
+                // console.log('>>> socket event: ', socketEvent);
             };
 
             conn.onmessage = socketMessage => {
-                console.log('>>> socket message: ', socketMessage);
+                // TODO
+                // console.log('>>> socket message: ', socketMessage);
             };
         })()
     </script>
