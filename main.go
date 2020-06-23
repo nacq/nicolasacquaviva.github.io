@@ -39,8 +39,13 @@ func health(w http.ResponseWriter, r *http.Request) {
     w.Write(data)
 }
 
-// just for dev
-func byPassOriginCheck(r *http.Request) bool {
+func checkOrigin(r *http.Request) bool {
+    if os.Getenv("MODE") == "production" {
+        origin := r.Header.Get("Origin")
+
+        return origin == "https://nicolasacquaviva.com"
+    }
+
     return true
 }
 
@@ -55,8 +60,7 @@ func getIP(r *http.Request) string {
 }
 
 func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
-    // TODO: remove this before deploy
-    upgrader.CheckOrigin = byPassOriginCheck
+    upgrader.CheckOrigin = checkOrigin
 
     c, err := upgrader.Upgrade(w, r, nil)
 
