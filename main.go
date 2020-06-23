@@ -43,7 +43,7 @@ func checkOrigin(r *http.Request) bool {
     if os.Getenv("MODE") == "production" {
         origin := r.Header.Get("Origin")
 
-        return origin == "https://nicolasacquaviva.com"
+        return origin == "https://nicolasacquaviva.com" || origin == "https://www.nicolasacquaviva.com"
     }
 
     return true
