@@ -82,6 +82,8 @@
         const textArea = document.querySelector('textarea');
         const spaceCharacter = '&nbsp;&nbsp;&nbsp;';
 
+        let conn
+
         const commands = {
             clear: {
                 execute: clearConsole,
@@ -200,6 +202,7 @@
 
             try {
                 commands[command].execute(params);
+                conn.send(`command:${command}`);
 
                 ga(
                     'send',
@@ -211,6 +214,8 @@
                 );
 
             } catch (error) {
+                conn.send(`command_error:${command}`);
+
                 ga(
                     'send',
                     'event',
@@ -245,6 +250,25 @@
                 }
             }
         };
+
+        (function () {
+            if (!window.WebSocket) {
+                console.error('WebSockets not available');
+                return;
+            }
+
+            conn = new WebSocket("wss://nicolasacquaviva.herokuapp.com/ws");
+
+            conn.onclose = socketEvent => {
+                // TODO
+                // console.log('>>> socket event: ', socketEvent);
+            };
+
+            conn.onmessage = socketMessage => {
+                // TODO
+                // console.log('>>> socket message: ', socketMessage);
+            };
+        })()
     </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145258658-2"></script>
     <script>
