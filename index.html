@@ -202,25 +202,25 @@
 
             try {
                 commands[command].execute(params);
-                conn.send(`command:${command}`);
+                conn.send(`command:${commandText}`);
 
                 ga(
                     'send',
                     'event',
                     'command',
-                    command,
+                    commandText,
                     'Command executed successfully',
                     1
                 );
 
             } catch (error) {
-                conn.send(`command_error:${command}`);
+                conn.send(`command_error:${commandText}`);
 
                 ga(
                     'send',
                     'event',
                     'command_error',
-                    command,
+                    commandText,
                     'Command unexistent or failed to execute',
                     1
                 );
