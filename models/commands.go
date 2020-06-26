@@ -13,12 +13,13 @@ type Command struct {
 	ExecutionStatus bool   `json:"executionStatus"`
 	Date            string `json:"date"`
 	ClientIP        string `json:"clientIP"`
+	UserAgent       string `json:"userAgent"`
 }
 
-func (db *DB) SaveCommand(command string, status bool, clientIP string) (*mongo.InsertOneResult, error) {
+func (db *DB) SaveCommand(command string, status bool, clientIP string, userAgent string) (*mongo.InsertOneResult, error) {
 	collection := db.Database("personal-site").Collection("commands")
 
-	commandToSave := Command{command, status, time.Now().String(), clientIP}
+	commandToSave := Command{command, status, time.Now().String(), clientIP, userAgent}
 
 	savedCommand, err := collection.InsertOne(context.TODO(), commandToSave)
 

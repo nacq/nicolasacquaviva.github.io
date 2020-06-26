@@ -84,7 +84,7 @@ func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
 
 		messageParts := strings.Split(string(message), ":")
 
-		env.db.SaveCommand(messageParts[1], messageParts[0] == "command", getIP(r))
+		env.db.SaveCommand(messageParts[1], messageParts[0] == "command", getIP(r), r.Header.Get("user-agent"))
 
 		// err = c.WriteMessage(mt, message)
 

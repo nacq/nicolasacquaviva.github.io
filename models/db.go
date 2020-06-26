@@ -9,7 +9,7 @@ import (
 )
 
 type Datastore interface {
-	SaveCommand(string, bool, string) (*mongo.InsertOneResult, error)
+	SaveCommand(string, bool, string, string) (*mongo.InsertOneResult, error)
 }
 
 type DB struct {
