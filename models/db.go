@@ -11,7 +11,9 @@ import (
 type Datastore interface {
 	AddContent(Content) (*mongo.InsertOneResult, error)
 	SaveCommand(string, bool, string, string) (*mongo.InsertOneResult, error)
-	GetContent(string) (*Content, error)
+	GetContentByName(string) (*Content, error)
+	GetContentByParentDir(string) ([]string, error)
+	GetFileContent(string) string
 }
 
 type DB struct {

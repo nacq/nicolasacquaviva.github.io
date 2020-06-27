@@ -33,7 +33,7 @@ func (db *DB) AddContent(content Content) (*mongo.InsertOneResult, error) {
 	return res, nil
 }
 
-func (db *DB) GetContent(name string) (*Content, error) {
+func (db *DB) GetContentByName(name string) (*Content, error) {
 	collection := db.Database("personal-site").Collection("content")
 
 	content := Content{}
@@ -53,4 +53,45 @@ func (db *DB) GetContent(name string) (*Content, error) {
 	}
 
 	return &content, nil
+}
+
+func (db *DB) GetContentByParentDir(parentDir string) ([]string, error) {
+	collection := db.Database("personal-site").Collection("content")
+
+	content := []string{}
+
+	// result is a cursor
+	result, err := collection.Find(context.TODO(), bson.M{"parentDir": parentDir})
+
+	if err != nil {
+		log.Println("Error finding content:", err.Error())
+		return nil, err
+	}
+
+	defer result.Close(context.TODO())
+
+	for result.Next(context.TODO()) {
+		var c Content
+
+		_ = result.Decode(&c)
+
+		if c.Type == "dir" {
+			c.Name = c.Name + "/"
+		}
+
+		content = append(content, c.Name)
+	}
+
+	return content, nil
+}
+
+func (db *DB) GetFileContent(name string) string {
+	collection := db.Database("personal-site").Collection("content")
+	file := Content{}
+
+	result := collection.FindOne(context.TODO(), bson.M{"name": name, "type": "file"})
+
+	_ = result.Decode(&file)
+
+	return file.Content
 }
