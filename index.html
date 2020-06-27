@@ -78,9 +78,29 @@
     </div>
     <script type="text/javascript">
         const historyNode = document.getElementsByClassName('history')[0];
-        const ps1 = "nico@home:~$ ";
-        const textArea = document.querySelector('textarea');
+        const currentDir = "~"
+        const ps1 = `nico@home:${currentDir}$ `;
         const spaceCharacter = '&nbsp;&nbsp;&nbsp;';
+
+        let textArea = document.querySelector('textarea');
+
+        textArea.disabled = true;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const xhr = new XMLHttpRequest();
+
+            textArea.value += "Loading ...";
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    textArea.disabled = false;
+                    resetInput();
+                }
+            };
+
+            xhr.open('GET', 'https://nicolasacquaviva.herokuapp.com/health');
+            xhr.send();
+        });
 
         let conn
 
@@ -90,28 +110,19 @@
                 description: 'Clear the console'
             },
             ls: {
-                execute: listDirectory,
+                // TODO: remove
+                execute: () => {},
                 description: 'List directory contents'
             },
             'cat': {
-                execute: executeCat,
+                // TODO: remove
+                execute: () => {},
                 description: 'Print file content'
             },
             help: {
                 execute: showHelp,
                 description: 'Show help about how to use the site'
             }
-        };
-
-        const files = {
-            'contact.txt': `- email: <a href="mailto:nicolaseacquaviva@gmail.com" target="_blank" class="link">nicolaseacquaviva@gmail.com</a>
-            - github: <a href="https://github.com/nicolasacquaviva" target="_blank" class="link">github.com/nicolasacquaviva</a>
-            - linkedin: <a href="https://linkedin.com/in/nicolasacquaviva" target="_blank" class="link">linkedin.com/in/nicolasacquaviva</a>`,
-            'about.txt': `Hey! This is Nico, I'm a software engineer from Argentina.
-            I've been working with web technologies for around 5 years.
-            I'm very passionate about minimalist software and terminal based applications.
-
-            If you want to get in touch check the "contact.txt" file. Glad to have you here!`
         };
 
         textArea.value = ps1;
@@ -136,40 +147,8 @@
             utils.clear();
         }
 
-        function executeCat (params) {
-            if (!params || params.length !== 1) {
-                utils.print('usage: cat [file_name]');
-            } else {
-                const fileContent = files[params[0]];
-
-                if (fileContent) {
-                    utils.print(fileContent);
-                } else {
-                    utils.print(`cat: ${params[0]}: No such file or directory`)
-                }
-            }
-        }
-
         function getDirContent () {
             return Object.keys(files).join(spaceCharacter);
-        }
-
-        function listDirectory (params) {
-            if (params && params[0] === '-a') {
-                listDirectoryWithHidden();
-            } else {
-                utils.print(getDirContent());
-            }
-        }
-
-        function listDirectoryWithHidden () {
-            utils.print(`.${spaceCharacter}..${spaceCharacter}${getDirContent()}`);
-        }
-
-        function showContactInformation () {
-            utils.print(`- email: <a href="mailto:nicolaseacquaviva@gmail.com" target="_blank" class="link">nicolaseacquaviva@gmail.com</a>
-            - github: <a href="https://github.com/nicolasacquaviva" target="_blank" class="link">github.com/nicolasacquaviva</a>
-            - linkedin: <a href="https://linkedin.com/in/nicolasacquaviva" target="_blank" class="link">linkedin.com/in/nicolasacquaviva</a>`);
         }
 
         function showHelp () {
@@ -202,7 +181,7 @@
 
             try {
                 commands[command].execute(params);
-                conn.send(`command:${commandText}`);
+                conn.send(`${currentDir}:${command}:${params}`);
 
                 ga(
                     'send',
@@ -214,7 +193,7 @@
                 );
 
             } catch (error) {
-                conn.send(`command_error:${commandText}`);
+                conn.send(`${currentDir}:${command}:${params}`);
 
                 ga(
                     'send',
@@ -224,11 +203,7 @@
                     'Command unexistent or failed to execute',
                     1
                 );
-
-                handleCommandNotFound(commandText);
             }
-
-            resetInput();
         }
 
         function onKeyDown (event) {
@@ -265,8 +240,8 @@
             };
 
             conn.onmessage = socketMessage => {
-                // TODO
-                // console.log('>>> socket message: ', socketMessage);
+                utils.print(socketMessage.data);
+                resetInput();
             };
         })()
     </script>
