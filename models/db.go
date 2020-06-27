@@ -2,14 +2,18 @@ package models
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log"
-	// "go.mongodb.org/mongo-driver/bson"
+
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Datastore interface {
+	AddContent(Content) (*mongo.InsertOneResult, error)
 	SaveCommand(string, bool, string, string) (*mongo.InsertOneResult, error)
+	GetContentByName(string) (*Content, error)
+	GetContentByParentDir(string) ([]string, error)
+	GetFileContent(string) string
 }
 
 type DB struct {
