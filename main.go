@@ -205,7 +205,7 @@ func (env *Env) executeCommand(input []string) string {
 	case "clear":
 		return ""
 	default:
-		return "command not found: " + command
+		return "command not found: " + command + ". Try using the 'help'"
 	}
 }
 
