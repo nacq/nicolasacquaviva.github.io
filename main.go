@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/nicolasacquaviva/nicolasacquaviva.github.io/models"
+	"github.com/nicolasacquaviva/nicolasacquaviva.github.io/server"
 
 	"github.com/gorilla/websocket"
 )
@@ -98,32 +99,8 @@ func health(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func checkOrigin(r *http.Request) bool {
-	if isProduction() {
-		origin := r.Header.Get("Origin")
-
-		return origin == "https://nicolasacquaviva.com" || origin == "https://www.nicolasacquaviva.com"
-	}
-
-	return true
-}
-
-func isProduction() bool {
-	return os.Getenv("MODE") == "production"
-}
-
-func getIP(r *http.Request) string {
-	forwardedFor := r.Header.Get("x-forwarded-for")
-
-	if forwardedFor != "" {
-		return forwardedFor
-	}
-
-	return r.RemoteAddr
-}
-
 func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
-	upgrader.CheckOrigin = checkOrigin
+	upgrader.CheckOrigin = server.CheckOrigin
 
 	c, err := upgrader.Upgrade(w, r, nil)
 
@@ -145,11 +122,11 @@ func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
 
 		messageParts := strings.Split(string(message), ":")
 
-		if isProduction() {
+		if server.IsProduction() {
 			env.db.SaveCommand(
 				messageParts[1],
 				messageParts[0] == "command",
-				getIP(r), r.Header.Get("user-agent"),
+				server.GetIPFromRequest(r), r.Header.Get("user-agent"),
 			)
 		}
 
