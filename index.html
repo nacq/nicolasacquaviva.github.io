@@ -81,6 +81,9 @@
         const currentDir = "~"
         const ps1 = `nico@home:${currentDir}$ `;
         const spaceCharacter = '&nbsp;&nbsp;&nbsp;';
+        const isProd = window.location.href.includes('nicolasacquaviva.com');
+        const apiUrl = isProd ? 'https://nicolasacquaviva.herokuapp.com' : 'http://localhost:3030';
+        const socketUrl = isProd ? 'wss://nicolasacquaviva.herokuapp.com' : 'ws://localhost:3030';
 
         let textArea = document.querySelector('textarea');
 
@@ -98,32 +101,11 @@
                 }
             };
 
-            xhr.open('GET', 'https://nicolasacquaviva.herokuapp.com/health');
+            xhr.open('GET', `${apiUrl}/health`);
             xhr.send();
         });
 
         let conn
-
-        const commands = {
-            clear: {
-                execute: clearConsole,
-                description: 'Clear the console'
-            },
-            ls: {
-                // TODO: remove
-                execute: () => {},
-                description: 'List directory contents'
-            },
-            'cat': {
-                // TODO: remove
-                execute: () => {},
-                description: 'Print file content'
-            },
-            help: {
-                execute: showHelp,
-                description: 'Show help about how to use the site'
-            }
-        };
 
         textArea.value = ps1;
         textArea.focus();
@@ -143,26 +125,6 @@
             }
         };
 
-        function clearConsole () {
-            utils.clear();
-        }
-
-        function getDirContent () {
-            return Object.keys(files).join(spaceCharacter);
-        }
-
-        function showHelp () {
-            utils.print('available commands: ');
-
-            for (command in commands) {
-                utils.print(` - ${command}: ${commands[command].description}`);
-            }
-        }
-
-        function handleCommandNotFound (command) {
-            utils.print(`command not found: ${command}`);
-        }
-
         function resetInput () {
             textArea.value = ps1;
             textArea.focus();
@@ -179,31 +141,20 @@
 
             utils.print(input);
 
-            try {
-                commands[command].execute(params);
-                conn.send(`${currentDir}:${command}:${params}`);
-
-                ga(
-                    'send',
-                    'event',
-                    'command',
-                    commandText,
-                    'Command executed successfully',
-                    1
-                );
-
-            } catch (error) {
-                conn.send(`${currentDir}:${command}:${params}`);
-
-                ga(
-                    'send',
-                    'event',
-                    'command_error',
-                    commandText,
-                    'Command unexistent or failed to execute',
-                    1
-                );
+            if (command === 'clear') {
+                utils.clear();
             }
+
+            conn.send(`${currentDir}:${command}:${params}`);
+
+            ga(
+                'send',
+                'event',
+                'command',
+                commandText,
+                'Command executed successfully',
+                1
+            );
         }
 
         function onKeyDown (event) {
@@ -232,17 +183,16 @@
                 return;
             }
 
-            conn = new WebSocket("wss://nicolasacquaviva.herokuapp.com/ws");
+            function connect () {
+                conn = new WebSocket(`${socketUrl}/ws`);
 
-            conn.onclose = socketEvent => {
-                // TODO
-                // console.log('>>> socket event: ', socketEvent);
-            };
+                conn.onmessage = socketMessage => {
+                    utils.print(socketMessage.data);
+                    resetInput();
+                };
+            }
 
-            conn.onmessage = socketMessage => {
-                utils.print(socketMessage.data);
-                resetInput();
-            };
+            connect();
         })()
     </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145258658-2"></script>
