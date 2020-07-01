@@ -97,7 +97,7 @@
             xhr.onload = () => {
                 if (xhr.status === 200) {
                     textArea.disabled = false;
-                    resetInput();
+                    resetInput(true);
                 }
             };
 
@@ -123,9 +123,17 @@
             }
         };
 
-        function resetInput () {
-            textArea.focus();
-            textArea.value = ps1;
+        function resetInput (delay) {
+            let timeout = 0;
+
+            if (delay) {
+                timeout = 500;
+            }
+
+            setTimeout(() => {
+                textArea.focus();
+                textArea.value = ps1;
+            }, timeout);
         }
 
         function onBlur (event) {
@@ -138,6 +146,7 @@
             const command = params.shift();
 
             utils.print(input);
+            resetInput();
 
             if (command === 'clear') {
                 utils.clear();
@@ -186,7 +195,6 @@
 
                 conn.onmessage = socketMessage => {
                     utils.print(socketMessage.data);
-                    resetInput();
                 };
             }
 
