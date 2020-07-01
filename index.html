@@ -107,27 +107,6 @@
 
         let conn
 
-        const commands = {
-            clear: {
-                execute: clearConsole,
-                description: 'Clear the console'
-            },
-            ls: {
-                // TODO: remove
-                execute: () => {},
-                description: 'List directory contents'
-            },
-            'cat': {
-                // TODO: remove
-                execute: () => {},
-                description: 'Print file content'
-            },
-            help: {
-                execute: showHelp,
-                description: 'Show help about how to use the site'
-            }
-        };
-
         textArea.value = ps1;
         textArea.focus();
         textArea.onblur = onBlur;
@@ -146,26 +125,6 @@
             }
         };
 
-        function clearConsole () {
-            utils.clear();
-        }
-
-        function getDirContent () {
-            return Object.keys(files).join(spaceCharacter);
-        }
-
-        function showHelp () {
-            utils.print('available commands: ');
-
-            for (command in commands) {
-                utils.print(` - ${command}: ${commands[command].description}`);
-            }
-        }
-
-        function handleCommandNotFound (command) {
-            utils.print(`command not found: ${command}`);
-        }
-
         function resetInput () {
             textArea.value = ps1;
             textArea.focus();
@@ -182,31 +141,20 @@
 
             utils.print(input);
 
-            try {
-                commands[command].execute(params);
-                conn.send(`${currentDir}:${command}:${params}`);
-
-                ga(
-                    'send',
-                    'event',
-                    'command',
-                    commandText,
-                    'Command executed successfully',
-                    1
-                );
-
-            } catch (error) {
-                conn.send(`${currentDir}:${command}:${params}`);
-
-                ga(
-                    'send',
-                    'event',
-                    'command_error',
-                    commandText,
-                    'Command unexistent or failed to execute',
-                    1
-                );
+            if (command === 'clear') {
+                utils.clear();
             }
+
+            conn.send(`${currentDir}:${command}:${params}`);
+
+            ga(
+                'send',
+                'event',
+                'command',
+                commandText,
+                'Command executed successfully',
+                1
+            );
         }
 
         function onKeyDown (event) {
