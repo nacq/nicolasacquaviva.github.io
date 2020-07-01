@@ -140,45 +140,21 @@ func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ls
-func (env *Env) listDirectory(dir string, params string) string {
-	content, err := env.db.GetContentByParentDir(dir)
-
-	if err != nil {
-		log.Println("Cannot list directory:", err)
-		return ""
-	}
-
-	return strings.Join(content[:], " ")
-}
-
-// cat
-func (env *Env) printFileContent(name string) string {
-	if name == "" {
-		return "usage: cat [file_name]"
-	}
-
-	content := env.db.GetFileContent(name)
-
-	if content == "" {
-		return "cat: " + name + ": No such file or directory"
-	}
-
-	return content
-}
-
 func (env *Env) executeCommand(input []string) string {
 	dir := input[0]
 	command := input[1]
 	params := input[2]
+	ListDirectory := server.NewListDirectory(env.db)
+	PrintFileContent := server.NewPrintFileContent(env.db)
+	Help := server.NewHelp(env.db)
 
 	switch command {
 	case "ls":
-		return env.listDirectory(dir, params)
+		return ListDirectory(dir, params)
 	case "cat":
-		return env.printFileContent(params)
+		return PrintFileContent(params)
 	case "help":
-		return ""
+		return Help()
 	case "clear":
 		return ""
 	default:
