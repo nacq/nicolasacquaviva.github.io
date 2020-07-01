@@ -107,8 +107,6 @@
 
         let conn
 
-        textArea.value = ps1;
-        textArea.focus();
         textArea.onblur = onBlur;
         textArea.onkeydown = onKeyDown;
 
@@ -126,8 +124,8 @@
         };
 
         function resetInput () {
-            textArea.value = ps1;
             textArea.focus();
+            textArea.value = ps1;
         }
 
         function onBlur (event) {
