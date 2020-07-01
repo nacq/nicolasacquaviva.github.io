@@ -81,6 +81,9 @@
         const currentDir = "~"
         const ps1 = `nico@home:${currentDir}$ `;
         const spaceCharacter = '&nbsp;&nbsp;&nbsp;';
+        const isProd = window.location.href.includes('nicolasacquaviva.com');
+        const apiUrl = isProd ? 'https://nicolasacquaviva.herokuapp.com' : 'http://localhost:3030';
+        const socketUrl = isProd ? 'wss://nicolasacquaviva.herokuapp.com' : 'ws://localhost:3030';
 
         let textArea = document.querySelector('textarea');
 
@@ -98,7 +101,7 @@
                 }
             };
 
-            xhr.open('GET', 'https://nicolasacquaviva.herokuapp.com/health');
+            xhr.open('GET', `${apiUrl}/health`);
             xhr.send();
         });
 
@@ -232,17 +235,16 @@
                 return;
             }
 
-            conn = new WebSocket("wss://nicolasacquaviva.herokuapp.com/ws");
+            function connect () {
+                conn = new WebSocket(`${socketUrl}/ws`);
 
-            conn.onclose = socketEvent => {
-                // TODO
-                // console.log('>>> socket event: ', socketEvent);
-            };
+                conn.onmessage = socketMessage => {
+                    utils.print(socketMessage.data);
+                    resetInput();
+                };
+            }
 
-            conn.onmessage = socketMessage => {
-                utils.print(socketMessage.data);
-                resetInput();
-            };
+            connect();
         })()
     </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145258658-2"></script>
