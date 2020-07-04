@@ -112,6 +112,8 @@ func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
 
 	defer c.Close()
 
+	c.WriteMessage(websocket.TextMessage, []byte("status:1"))
+
 	for {
 		messageType, message, err := c.ReadMessage()
 

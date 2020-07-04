@@ -177,7 +177,13 @@
                 event.preventDefault();
 
                 if (textArea.value !== ps1) {
-                    executeCommand(textArea.value);
+                    if (!conn || conn.readyState === conn.CLOSED || conn.readyState === conn.CLOSING) {
+                        conn.reConnect().then(() => {
+                            executeCommand(textArea.value)
+                        });
+                    } else {
+                        executeCommand(textArea.value);
+                    }
                 } else {
                     utils.print(ps1);
                 }
@@ -191,11 +197,19 @@
             }
 
             function connect () {
-                conn = new WebSocket(`${socketUrl}/ws`);
+                return new Promise(resolve => {
+                    conn = new WebSocket(`${socketUrl}/ws`);
 
-                conn.onmessage = socketMessage => {
-                    utils.print(socketMessage.data);
-                };
+                    conn.onmessage = socketMessage => {
+                        if (socketMessage && socketMessage.data === 'status:1') {
+                            return resolve();
+                        }
+
+                        utils.print(socketMessage.data);
+                    };
+
+                    conn.reConnect = connect;
+                });
             }
 
             connect();
