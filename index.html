@@ -78,8 +78,8 @@
     </div>
     <script type="text/javascript">
         const historyNode = document.getElementsByClassName('history')[0];
-        const currentDir = "~"
-        const ps1 = `nico@home:${currentDir}$ `;
+        let currentDir = "~"
+        let ps1 = `nico@home:${currentDir} $ `;
         const spaceCharacter = '&nbsp;&nbsp;&nbsp;';
         const isProd = window.location.href.includes('nicolasacquaviva.com');
         const apiUrl = isProd ? 'https://nicolasacquaviva.herokuapp.com' : 'http://localhost:3030';
@@ -97,7 +97,7 @@
             xhr.onload = () => {
                 if (xhr.status === 200) {
                     textArea.disabled = false;
-                    resetInput(true);
+                    utils.resetInput(true);
                 }
             };
 
@@ -120,21 +120,20 @@
                 while (historyNode.firstChild) {
                     historyNode.removeChild(historyNode.firstChild);
                 }
+            },
+            resetInput: (delay) => {
+                let timeout = 0;
+
+                if (delay) {
+                    timeout = 500;
+                }
+
+                setTimeout(() => {
+                    textArea.focus();
+                    textArea.value = ps1;
+                }, timeout);
             }
         };
-
-        function resetInput (delay) {
-            let timeout = 0;
-
-            if (delay) {
-                timeout = 500;
-            }
-
-            setTimeout(() => {
-                textArea.focus();
-                textArea.value = ps1;
-            }, timeout);
-        }
 
         function onBlur (event) {
             textArea.focus();
@@ -146,7 +145,7 @@
             const command = params.shift();
 
             utils.print(input);
-            resetInput();
+            utils.resetInput();
 
             if (command === 'clear') {
                 utils.clear();
@@ -190,6 +189,12 @@
             }
         };
 
+        function changeDirectory (directory) {
+            currentDir += `/${directory}`;
+            ps1 = `nico@home:${currentDir} $ `;
+            utils.resetInput();
+        }
+
         (function () {
             if (!window.WebSocket) {
                 console.error('WebSockets not available');
@@ -201,11 +206,13 @@
                     conn = new WebSocket(`${socketUrl}/ws`);
 
                     conn.onmessage = socketMessage => {
-                        if (socketMessage && socketMessage.data === 'status:1') {
+                        if (socketMessage.data === 'connection:status:1') {
                             return resolve();
+                        } else if (/cd:status:1:[A-z]*/.test(socketMessage.data)) {
+                            changeDirectory(socketMessage.data.split(':').reverse()[0])
+                        } else {
+                            utils.print(socketMessage.data);
                         }
-
-                        utils.print(socketMessage.data);
                     };
 
                     conn.reConnect = connect;
