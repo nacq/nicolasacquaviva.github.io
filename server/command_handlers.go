@@ -7,6 +7,34 @@ import (
 	"github.com/nicolasacquaviva/nicolasacquaviva.github.io/models"
 )
 
+// cd
+func ChangeDirectory(db models.Datastore) func(string, string) string {
+	return func(currDir string, dirToGo string) string {
+		if dirToGo == "" {
+			return "cd:status:1:~"
+		}
+
+		errMessage := "cd: not a directory: " + dirToGo
+		currentDirContent, err := db.GetContentByParentDir(currDir)
+
+		if err != nil {
+			log.Println("Cannot list directory:", err)
+			return errMessage
+		}
+
+		for _, content := range currentDirContent {
+			// if the given dir is equal to the dir name with or without
+			// the ending forward slash
+			// and the last char of one of the content is a forward slash (means it is a dir)
+			if (dirToGo == content || dirToGo == content[:len(content)-1]) && content[len(content)-1:] == "/" {
+				return "cd:status:1:" + content
+			}
+		}
+
+		return errMessage
+	}
+}
+
 // help
 func NewHelp(db models.Datastore) func() string {
 	return func() string {

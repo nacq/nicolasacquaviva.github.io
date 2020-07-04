@@ -112,7 +112,7 @@ func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
 
 	defer c.Close()
 
-	c.WriteMessage(websocket.TextMessage, []byte("status:1"))
+	c.WriteMessage(websocket.TextMessage, []byte("connection:status:1"))
 
 	for {
 		messageType, message, err := c.ReadMessage()
@@ -146,11 +146,15 @@ func (env *Env) executeCommand(input []string) string {
 	dir := input[0]
 	command := input[1]
 	params := input[2]
+
+	ChangeDirectory := server.ChangeDirectory(env.db)
 	ListDirectory := server.NewListDirectory(env.db)
 	PrintFileContent := server.NewPrintFileContent(env.db)
 	Help := server.NewHelp(env.db)
 
 	switch command {
+	case "cd":
+		return ChangeDirectory(dir, params)
 	case "ls":
 		return ListDirectory(dir, params)
 	case "cat":
