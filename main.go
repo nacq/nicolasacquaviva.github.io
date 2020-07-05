@@ -147,7 +147,7 @@ func (env *Env) executeCommand(input []string) string {
 	command := input[1]
 	params := input[2]
 
-	ChangeDirectory := server.ChangeDirectory(env.db)
+	ChangeDirectory := server.NewChangeDirectory(env.db)
 	ListDirectory := server.NewListDirectory(env.db)
 	PrintFileContent := server.NewPrintFileContent(env.db)
 	Help := server.NewHelp(env.db)

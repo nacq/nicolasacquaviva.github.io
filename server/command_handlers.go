@@ -15,7 +15,7 @@ func getPathLastPart(path string) string {
 }
 
 // cd
-func ChangeDirectory(db models.Datastore) func(string, string) string {
+func NewChangeDirectory(db models.Datastore) func(string, string) string {
 	return func(currDir string, dirToGo string) string {
 		// go to home dir (~) if no given dir name
 		if dirToGo == "" {
