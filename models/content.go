@@ -14,19 +14,19 @@ type Content struct {
 	Name      string `bson:"name"`
 	Type      string `bson:"type"`
 	Content   string `bson:"content"`
+	Path      string `bson:"path"`
 }
 
 func (db *DB) AddContent(content Content) (*mongo.InsertOneResult, error) {
 	collection := db.Database("personal-site").Collection("content")
 
-	if content.Name == "" || content.ParentDir == "" || content.Type == "" {
-		return nil, errors.New("name, parentDir and type are required")
+	if content.Name == "" || content.ParentDir == "" || content.Type == "" || content.Path == "" {
+		return nil, errors.New("name, parentDir, type, path are required")
 	}
 
 	res, err := collection.InsertOne(context.TODO(), content)
 
 	if err != nil {
-		log.Println("Error inserting content:", err)
 		return nil, err
 	}
 
@@ -41,14 +41,12 @@ func (db *DB) GetContentByName(name string) (*Content, error) {
 	result := collection.FindOne(context.TODO(), bson.M{"name": name})
 
 	if result.Err() != nil {
-		log.Println("Error finding content:", result.Err())
 		return nil, result.Err()
 	}
 
 	decodeError := result.Decode(&content)
 
 	if decodeError != nil {
-		log.Println("Error decoding content:", decodeError)
 		return nil, decodeError
 	}
 
@@ -64,7 +62,6 @@ func (db *DB) GetContentByParentDir(parentDir string) ([]string, error) {
 	result, err := collection.Find(context.TODO(), bson.M{"parentDir": parentDir})
 
 	if err != nil {
-		log.Println("Error finding content:", err.Error())
 		return nil, err
 	}
 
@@ -83,6 +80,30 @@ func (db *DB) GetContentByParentDir(parentDir string) ([]string, error) {
 	}
 
 	return content, nil
+}
+
+// gets the parent dir by the name of one of its children
+func (db *DB) GetContentsParentByChild(name string) (*Content, error) {
+	collection := db.Database("personal-site").Collection("content")
+	child := collection.FindOne(context.TODO(), bson.M{"name": name})
+
+	if child.Err() != nil {
+		return nil, child.Err()
+	}
+
+	var childContent Content
+	_ = child.Decode(&childContent)
+
+	parent := collection.FindOne(context.TODO(), bson.M{"name": childContent.ParentDir})
+
+	if parent.Err() != nil {
+		return nil, parent.Err()
+	}
+
+	var parentContent Content
+	_ = parent.Decode(&parentContent)
+
+	return &parentContent, nil
 }
 
 func (db *DB) GetFileContent(name string) string {
