@@ -78,7 +78,7 @@ func NewHelp(db models.Datastore) func() string {
 // ls
 func NewListDirectory(db models.Datastore) func(string, string) string {
 	return func(dir string, params string) string {
-		content, err := db.GetContentByParentDir(dir)
+		content, err := db.GetContentByParentDir(getPathLastPart(dir))
 
 		if err != nil {
 			log.Println("Cannot list directory:", err)
