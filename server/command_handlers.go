@@ -42,6 +42,7 @@ func ChangeDirectory(db models.Datastore) func(string, string) string {
 			return errMessage
 		}
 
+		// checks if the dir to go is part of the current directory
 		for _, content := range currentDirContent {
 			// if the given dir is equal to the dir name with or without
 			// the ending forward slash
