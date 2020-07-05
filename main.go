@@ -148,9 +148,10 @@ func (env *Env) executeCommand(input []string) string {
 	params := input[2]
 
 	ChangeDirectory := server.NewChangeDirectory(env.db)
+	Display := server.NewDisplayImage(env.db)
+	Help := server.NewHelp(env.db)
 	ListDirectory := server.NewListDirectory(env.db)
 	PrintFileContent := server.NewPrintFileContent(env.db)
-	Help := server.NewHelp(env.db)
 
 	switch command {
 	case "cd":
@@ -161,6 +162,8 @@ func (env *Env) executeCommand(input []string) string {
 		return PrintFileContent(params)
 	case "help":
 		return Help()
+	case "display":
+		return Display(dir + "/" + params)
 	case "clear":
 		return ""
 	default:

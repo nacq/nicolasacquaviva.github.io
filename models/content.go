@@ -81,6 +81,20 @@ func (db *DB) GetContentByParentDir(parentDir string) ([]string, error) {
 	return content, nil
 }
 
+func (db *DB) GetContentByPath(path string) (*Content, error) {
+	collection := db.Database("personal-site").Collection("content")
+	result := collection.FindOne(context.TODO(), bson.M{"path": path})
+	content := Content{}
+
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	_ = result.Decode(&content)
+
+	return &content, nil
+}
+
 // gets the parent dir by the name of one of its children
 func (db *DB) GetContentsParentByChild(name string) (*Content, error) {
 	collection := db.Database("personal-site").Collection("content")

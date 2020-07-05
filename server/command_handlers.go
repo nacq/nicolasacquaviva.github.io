@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -12,6 +13,20 @@ func getPathLastPart(path string) string {
 	splittedPath := strings.Split(path, "/")
 
 	return splittedPath[len(splittedPath)-1]
+}
+
+// display
+func NewDisplayImage(db models.Datastore) func(string) string {
+	return func(imagePath string) string {
+		content, err := db.GetContentByPath(imagePath)
+
+		if err != nil {
+			log.Println("Cannot get image:", err)
+			return fmt.Sprintf("display: %s: No such image", getPathLastPart(imagePath))
+		}
+
+		return fmt.Sprintf("display:status:1:%s", content.Content)
+	}
 }
 
 // cd
@@ -70,6 +85,7 @@ func NewHelp(db models.Datastore) func() string {
 		- cat: Print file content
 		- cd: Change directory
 		- clear: Clear the console
+		- display: Display image file
 		- help: Show help about how to use this site
 		- ls: List directory contents`
 	}

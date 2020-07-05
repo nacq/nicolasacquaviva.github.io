@@ -13,6 +13,7 @@ type Datastore interface {
 	SaveCommand(string, bool, string, string) (*mongo.InsertOneResult, error)
 	GetContentByName(string) (*Content, error)
 	GetContentByParentDir(string) ([]string, error)
+	GetContentByPath(string) (*Content, error)
 	GetContentsParentByChild(string) (*Content, error)
 	GetFileContent(string) string
 }

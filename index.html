@@ -53,6 +53,11 @@
             pointer-events: all;
         }
 
+        .history img {
+            margin: 10px;
+            max-width: 160px;
+        }
+
         .terminal textarea, .history {
             color: #ffc;
             font-size: 18px;
@@ -195,6 +200,12 @@
             utils.resetInput();
         }
 
+        function renderImage (image) {
+            const newHistoryNode = document.createElement('img');
+            newHistoryNode.src = image;
+            historyNode.appendChild(newHistoryNode);
+        }
+
         (function () {
             if (!window.WebSocket) {
                 console.error('WebSockets not available');
@@ -208,8 +219,10 @@
                     conn.onmessage = socketMessage => {
                         if (socketMessage.data === 'connection:status:1') {
                             return resolve();
-                        } else if (/cd:status:1:[A-z]*/.test(socketMessage.data)) {
+                        } else if (~socketMessage.data.indexOf('cd:status:1')) {
                             changeDirectory(socketMessage.data.split(':').reverse()[0])
+                        } else if (~socketMessage.data.indexOf('display:status:1')) {
+                            renderImage(socketMessage.data.split(':').reverse()[0])
                         } else {
                             utils.print(socketMessage.data);
                         }
