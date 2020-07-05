@@ -190,7 +190,7 @@
         };
 
         function changeDirectory (directory) {
-            currentDir += `/${directory}`;
+            currentDir = directory;
             ps1 = `nico@home:${currentDir} $ `;
             utils.resetInput();
         }
