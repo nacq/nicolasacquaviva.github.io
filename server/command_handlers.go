@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/nicolasacquaviva/nicolasacquaviva.github.io/models"
+	"github.com/nicolasacquaviva/nicolasacquaviva.github.io/types"
 )
 
 // get the last part of a path, used to get the filename or the directory
@@ -16,7 +16,7 @@ func getPathLastPart(path string) string {
 }
 
 // display
-func NewDisplayImage(db models.Datastore) func(string) string {
+func NewDisplayImage(db types.Datastore) func(string) string {
 	return func(imagePath string) string {
 		content, err := db.GetContentByPath(imagePath)
 
@@ -30,7 +30,7 @@ func NewDisplayImage(db models.Datastore) func(string) string {
 }
 
 // cd
-func NewChangeDirectory(db models.Datastore) func(string, string) string {
+func NewChangeDirectory(db types.Datastore) func(string, string) string {
 	return func(currDir string, dirToGo string) string {
 		// go to home dir (~) if no given dir name
 		if dirToGo == "" {
@@ -79,7 +79,7 @@ func NewChangeDirectory(db models.Datastore) func(string, string) string {
 }
 
 // help
-func NewHelp(db models.Datastore) func() string {
+func NewHelp(db types.Datastore) func() string {
 	return func() string {
 		return `available commands:
 		- cat: Print file content
@@ -92,7 +92,7 @@ func NewHelp(db models.Datastore) func() string {
 }
 
 // ls
-func NewListDirectory(db models.Datastore) func(string, string) string {
+func NewListDirectory(db types.Datastore) func(string, string) string {
 	return func(dir string, params string) string {
 		content, err := db.GetContentByParentDir(getPathLastPart(dir))
 
@@ -106,7 +106,7 @@ func NewListDirectory(db models.Datastore) func(string, string) string {
 }
 
 // cat
-func NewPrintFileContent(db models.Datastore) func(string) string {
+func NewPrintFileContent(db types.Datastore) func(string) string {
 	return func(name string) string {
 		if name == "" {
 			return "usage: cat [file_name]"
