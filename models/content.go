@@ -4,19 +4,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/nicolasacquaviva/nicolasacquaviva.github.io/types"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Content struct {
-	ParentDir string `bson:"parentDir"`
-	Name      string `bson:"name"`
-	Type      string `bson:"type"`
-	Content   string `bson:"content"`
-	Path      string `bson:"path"`
-}
-
-func (db *DB) AddContent(content Content) (*mongo.InsertOneResult, error) {
+func (db *DB) AddContent(content types.Content) (*mongo.InsertOneResult, error) {
 	collection := db.Database("personal-site").Collection("content")
 
 	if content.Name == "" || content.ParentDir == "" || content.Type == "" || content.Path == "" {
@@ -32,10 +26,10 @@ func (db *DB) AddContent(content Content) (*mongo.InsertOneResult, error) {
 	return res, nil
 }
 
-func (db *DB) GetContentByName(name string) (*Content, error) {
+func (db *DB) GetContentByName(name string) (*types.Content, error) {
 	collection := db.Database("personal-site").Collection("content")
 
-	content := Content{}
+	content := types.Content{}
 
 	result := collection.FindOne(context.TODO(), bson.M{"name": name})
 
@@ -67,7 +61,7 @@ func (db *DB) GetContentByParentDir(parentDir string) ([]string, error) {
 	defer result.Close(context.TODO())
 
 	for result.Next(context.TODO()) {
-		var c Content
+		var c types.Content
 
 		_ = result.Decode(&c)
 
@@ -81,10 +75,10 @@ func (db *DB) GetContentByParentDir(parentDir string) ([]string, error) {
 	return content, nil
 }
 
-func (db *DB) GetContentByPath(path string) (*Content, error) {
+func (db *DB) GetContentByPath(path string) (*types.Content, error) {
 	collection := db.Database("personal-site").Collection("content")
 	result := collection.FindOne(context.TODO(), bson.M{"path": path})
-	content := Content{}
+	content := types.Content{}
 
 	if result.Err() != nil {
 		return nil, result.Err()
@@ -96,7 +90,7 @@ func (db *DB) GetContentByPath(path string) (*Content, error) {
 }
 
 // gets the parent dir by the name of one of its children
-func (db *DB) GetContentsParentByChild(name string) (*Content, error) {
+func (db *DB) GetContentsParentByChild(name string) (*types.Content, error) {
 	collection := db.Database("personal-site").Collection("content")
 	child := collection.FindOne(context.TODO(), bson.M{"name": name})
 
@@ -104,7 +98,7 @@ func (db *DB) GetContentsParentByChild(name string) (*Content, error) {
 		return nil, child.Err()
 	}
 
-	var childContent Content
+	var childContent types.Content
 	_ = child.Decode(&childContent)
 
 	parent := collection.FindOne(context.TODO(), bson.M{"name": childContent.ParentDir})
@@ -113,7 +107,7 @@ func (db *DB) GetContentsParentByChild(name string) (*Content, error) {
 		return nil, parent.Err()
 	}
 
-	var parentContent Content
+	var parentContent types.Content
 	_ = parent.Decode(&parentContent)
 
 	return &parentContent, nil
@@ -121,7 +115,7 @@ func (db *DB) GetContentsParentByChild(name string) (*Content, error) {
 
 func (db *DB) GetFileContent(name string) string {
 	collection := db.Database("personal-site").Collection("content")
-	file := Content{}
+	file := types.Content{}
 
 	result := collection.FindOne(context.TODO(), bson.M{"name": name, "type": "file"})
 
