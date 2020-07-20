@@ -148,7 +148,7 @@ func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
 
 		if IsProduction() {
 			env.DB.SaveCommand(
-				messageParts[1],
+				strings.Join(messageParts[1:], " "),
 				messageParts[0] == "command",
 				GetIPFromRequest(r), r.Header.Get("user-agent"),
 			)
