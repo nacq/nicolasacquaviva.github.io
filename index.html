@@ -110,6 +110,14 @@
             xhr.send();
         });
 
+        document.addEventListener('click', () => {
+            textArea.focus();
+        });
+
+        window.addEventListener('scroll', () => {
+            textArea.focus();
+        });
+
         let conn
 
         textArea.onblur = onBlur;
