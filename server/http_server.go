@@ -165,9 +165,11 @@ func (env *Env) ws(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartHttpServer(env *Env) {
-	http.HandleFunc("/content", env.content)
-	http.HandleFunc("/health", health)
-	http.HandleFunc("/ws", env.ws)
+	mux := http.NewServeMux()
 
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
+	mux.Handle("/content", AuthenticateMiddleware(http.HandlerFunc(env.content)))
+	mux.Handle("/health", http.HandlerFunc(health))
+	mux.Handle("/ws", http.HandlerFunc(env.ws))
+
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), mux))
 }
