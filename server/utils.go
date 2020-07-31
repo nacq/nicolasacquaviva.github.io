@@ -12,14 +12,34 @@ import (
 func AuthenticateMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorizationHeader := r.Header.Get("Authorization")
-		tokenString := strings.Split(authorizationHeader, " ")[1]
-		token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+
+		if authorizationHeader == "" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		headerParts := strings.Split(authorizationHeader, " ")
+		scheme := headerParts[0]
+
+		if scheme != "Bearer" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := headerParts[1]
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
+
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 
