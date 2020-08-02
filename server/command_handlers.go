@@ -94,7 +94,15 @@ func NewHelp(db types.Datastore) func() string {
 // ls
 func NewListDirectory(db types.Datastore) func(string, string) string {
 	return func(dir string, params string) string {
-		content, err := db.GetContentByParentDir(getPathLastPart(dir))
+		var dirToList string
+
+		if params != "" {
+			dirToList = params
+		} else {
+			dirToList = getPathLastPart(dir)
+		}
+
+		content, err := db.GetContentByParentDir(dirToList)
 
 		if err != nil {
 			log.Println("Cannot list directory:", err)
